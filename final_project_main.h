@@ -1,10 +1,13 @@
+// final_project_main.h
+//  header file for final_project_main.c
+
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
 #ifndef FINAL_PROJECT_MAIN_H
 #define	FINAL_PROJECT_MAIN_H
 
-#include <xc.h> // include processor files - each processor file is guarded.
+#include <xc.h>
 #include <stdint.h>
 
 // function prototypes

@@ -1,3 +1,6 @@
+// final_project_main.c
+//  TODO DOCS
+
 
 // includes
 #include "xc.h"
@@ -43,7 +46,14 @@ void setup(void)
     //Set RCDIV=1:1 (default 2:1) 32MHz or FCY/2=16M
     CLKDIVbits.RCDIV = 0;
     
+    // init the button
+    // TODO
     
+    // init the display
+    // TODO
+    
+    // init the game logic
+    // TODO
 }
 
 
@@ -51,19 +61,7 @@ void setup(void)
 //  function called as fast as possible in an endless loop
 void loop(void)
 {
-    
-}
-
-
-// timer1 ISR
-//  called every 1sec, toggle the heartbeat LED
-void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
-{
-    // reset the interrupt flag and increase the overflow value
-    IFS0bits.T1IF = 0;
-    
-    // toggle the led
-    LATAbits.LATA0 = 1 - LATAbits.LATA0;
+    // TODO
 }
 
 
