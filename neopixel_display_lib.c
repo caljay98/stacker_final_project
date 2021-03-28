@@ -8,41 +8,70 @@
 
 
 // global variables
-volatile uint32_t* frame_buffer;        // the frame buffer read from. Must be 64 elements long
-volatile uint8_t current_led = 0;       // counter for each led
-volatile uint8_t current_bit = 0;       // counter for each bit in the color code
+volatile uint32_t frame_buffer[NUM_OF_PIX];     // the frame buffer read from. Must be 64 elements long
+volatile uint8_t current_led = 0;               // counter for each led
+volatile uint8_t current_bit = 0;               // counter for each bit in the color code
 
 
 // display_init
 //  This function will init the display and all of the needed interrupts. Parameters
 //  for the function are still TBD. Should always succeed
-void display_init(volatile uint32_t* buffer)
+void display_init()
 {
-    frame_buffer = buffer;
-    
     // TODO init all of the hardware peripherals
 }
 
 
-// set_frame_buffer
-//  This function will change the frame_buffer pointer to the function parameter
-//  frame_buffer must be 8x8. This function has no return as it cannot fail (except
-//  for a segfault)
-void set_frame_buffer(volatile uint32_t* new_buffer)
+// set_background
+//  function to set the background color of the display. Call this before adding
+//  elements to the display as those will replace the background pixels in that
+//  spot
+void set_background(uint32_t color)
 {
-    frame_buffer = new_buffer;
+    uint8_t x, y;
+    
+    for (y = 0; y < DISP_HEIGHT; y++)
+    {
+        for (x = 0; x < DISP_WIDTH; x++)
+        {
+            frame_buffer[(y*DISP_WIDTH) + x] = color;
+        }
+    }
 }
 
 
 // add_element_to_disp
 //  function to add a rectangular element to the screen. This element will have
-//  a xpos and ypos, width and height, and color. Returns any errors that arise
+//  a xpos and ypos, width and height, and color. Returns any errors that arise.
+//  If the width or height forces part of an element out of the display, the valid
+//  parts of the element will still be drawn
 DISPLAY_ERR add_element_to_disp(uint8_t xpos, uint8_t ypos,
         uint8_t width, uint8_t height, uint32_t color)
 {
-    // TODO
+    uint8_t x, y;
     
-    return NOT_IMPLEMENTED;
+    // check the positions are in range
+    if (xpos < 0 || xpos >= DISP_WIDTH || ypos < 0 || ypos >= DISP_HEIGHT)
+    {
+        return POS_OUT_OF_RANGE;
+    }
+    
+    // check the width and height
+    if (width <= 0 || height <= 0)
+    {
+        return SIZE_NOT_VALID;
+    }
+    
+    // run through each pixel in the element and set the color of that pixel
+    for (y = ypos; y < (ypos+height) && y < DISP_HEIGHT; y++)
+    {
+        for (x = xpos; x < (xpos+width) && x < DISP_HEIGHT; x++)
+        {
+            frame_buffer[(y*DISP_WIDTH) + x] = color;
+        }
+    }
+    
+    return DISP_SUCCESS;
 }
 
 
@@ -52,11 +81,14 @@ DISPLAY_ERR add_element_to_disp(uint8_t xpos, uint8_t ypos,
 DISPLAY_ERR set_pixel(uint8_t xpos, uint8_t ypos, uint32_t color)
 {
     // check to make sure the inputs are valid
-    // TODO
+    if (xpos < 0 || xpos >= DISP_WIDTH || ypos < 0 || ypos >= DISP_HEIGHT)
+    {
+        return POS_OUT_OF_RANGE;
+    }
     
     frame_buffer[(ypos*DISP_WIDTH) + xpos] = color;
     
-    return NOT_IMPLEMENTED;
+    return DISP_SUCCESS;
 }
 
 

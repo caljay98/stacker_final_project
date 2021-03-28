@@ -23,6 +23,13 @@ void delay(uint16_t wait_time);
 // general defines
 // TODO
 
+
+// some nice macro functions
+#define PACK(r, g, b) ((((r) & 0xFF) << 16) | (((g) & 0xFF) << 8) | ((b) & 0xFF))
+#define UNPACK_RED(packed) (0xFF & ((packed) >> 16))
+#define UNPACK_GRN(packed) (0xFF & ((packed) >> 8))
+#define UNPACK_BLU(packed) (0xFF & (packed))
+
 #endif
 
 

@@ -14,8 +14,10 @@
 typedef enum
 {
     DISP_SUCCESS = 0,
-    
-    NOT_IMPLEMENTED = -99
+    POS_OUT_OF_RANGE = 1,
+    SIZE_NOT_VALID = 2,
+            
+    NOT_IMPLEMENTED = 99
 } DISPLAY_ERR;
 
 // function prototypes
@@ -24,6 +26,7 @@ typedef enum
 // general defines
 #define DISP_WIDTH 8
 #define DISP_HEIGHT 8
+#define NUM_OF_PIX 64
 #define WRTIE_0_HIGH_CYCLES 6       // .375us
 #define WRITE_1_HIGH_CYCLES 12      // .75us
 
