@@ -21,7 +21,13 @@ typedef enum
 } DISPLAY_ERR;
 
 // function prototypes
-// TODO
+void display_init();
+void set_background(uint8_t red, uint8_t grn, uint8_t blu);
+DISPLAY_ERR add_element_to_disp(uint8_t xpos, uint8_t ypos,
+        uint8_t width, uint8_t height, uint8_t red, uint8_t grn, uint8_t blu);
+DISPLAY_ERR set_pixel(uint8_t xpos, uint8_t ypos,
+        uint8_t red, uint8_t grn, uint8_t blu);
+void update_display(void);
 
 // general defines
 #define OCMODE_OFF 0b0

@@ -62,7 +62,7 @@ void setup(void)
 //  function called as fast as possible in an endless loop
 void loop(void)
 {
-    set_background(brightness, brightness, brightness);
+    set_background(0xAA, 0xAA, 0xAA);
     update_display();
     delay(10);
     brightness++;

@@ -148,49 +148,48 @@ void update_display(void)
     
     // get the first bit in the sequence and set OC1RS as needed
     if (frame_buffer[current_byte] & current_bit)
-    {
-        // the first bit is a 1
         OC1RS = WRITE_1_HIGH_CYCLES;
-    }
+    
     else
-    {
-        // the first bit is a 0
         OC1RS = WRITE_0_HIGH_CYCLES;
-    }
     
     // reset to right after the falling edge so OC1 starts low
     TMR2 = WRITE_0_HIGH_CYCLES+1;
+    _T2IF = 0;                      // this should not be set, but reset just in case
     
     // this will hang while outputting the bit sequence, and will determine if the
     // next bit sent will need to be a 0 or a 1. It is written in assembly to be
     // extra speedy
     
-    // push all of our working regs to the stack
-    asm("push w0");                     // used as a temp reg for movement
-    asm("push w1");
-    asm("push w2");
-    asm("push w3");
-    asm("push w4");
+    // we do not need to push/pop the working regs as C saves everything needed
+    // in mem, not in regs
+    
+    // note: C uses w0 and w1 for some operations here, make sure to check the
+    // disassembly if any major changes are made to make sure w3 and w4 are not
+    // being used
+    
+    // TODO what if an interrupt happens in the middle of this process, changing the regs?
+    // tell everyone that every ISR function should push and pop w3 and w4
     
     // put T2IF(IFS0 bit 7), OC1RS, current_byte and bit in working regs, we will be using them a lot
-    WREG1 = IFS0;
-    WREG2 = OC1RS;
-    WREG3 = current_byte;
-    WREG4 = current_bit;
-        
+    WREG3 = &current_byte;
+    WREG4 = &current_bit;
+    
     // start timer2 beginning the whole process
     T2CONbits.TON = 1;
     
     asm("START:");
     
-    // wait here until timer2 resets (TODO this may not work, I think OC1 resets this)
-    while(!_T1IF);
+    // wait here until timer2 resets. We do not use an interrupt because calling
+    // and returning takes too many cycles. T2IF is in IFS0 bit 7
+    while (!_T2IF);             // I cant do this any better in ASM
+    _T2IF = 0;                  // bclr
     
     // right shift the current_bit by 1
-    asm("mov #0x01, w0");
-    asm("asr [w4], w0");
+    asm("asr [w4], [w4]");
     
-    // check if the current_bit underflowed, meaning we need to move on to the next byte
+    // check if the current_bit underflowed, meaning we need to move on to the next
+    // byte. Otherwise don't move on to the next byte
     asm("bra NC, CHECK_END");
     
     // the current_bit underflowed, increase the current_byte and set current_bit to 0x80
@@ -201,13 +200,12 @@ void update_display(void)
     asm("CHECK_END:");
     // check if the current_byte is at the end of the array, meaning we are done
     // sending bits and should jump to the end and turn off the timer2
-    if (current_byte >= TOTAL_BYTES)
-    {
-        asm("bra END");
-    }
+    asm("mov #0xC0, w0");       // 0xC0 is the total bytes in the sequence
+    asm("cp w0, [w3]");         // compare the current_byte to the total bytes(w0)
+    asm("bra Z, END");          // if they are equal, go to the end
     
     // check if the next bit in the sequence is a 1 or a 0 and set OC1RS accordingly
-    if (frame_buffer[current_byte] & current_bit)
+    if (frame_buffer[current_byte] & current_bit)   // TODO this is kinda slow
         OC1RS = WRITE_1_HIGH_CYCLES;
     
     else
@@ -216,15 +214,9 @@ void update_display(void)
     asm("bra START");
     
     asm("END:");
-    while(!_T1IF);                  // wait until the last cycle is over (TODO this may not work as OC1 resets the bit)
-    T2CONbits.TON = 0;              // turn off the timer, this will also disable OC1
+    while(TMR2 < OC1R);              // wait until the high part of the last cycle is over
     
-    // pop everything off the stack
-    asm("pop w4");
-    asm("pop w3");
-    asm("pop w2");
-    asm("pop w1");
-    asm("pop w0");
+    T2CONbits.TON = 0;              // turn off the timer, this will also disable OC1
 }
 
 
