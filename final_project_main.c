@@ -5,6 +5,7 @@
 // includes
 #include "xc.h"
 #include "final_project_main.h"
+#include "neopixel_display_lib.h"
 
 
 // pragmas
@@ -26,7 +27,7 @@
 
 
 // global variables / defines
-// TODO
+uint8_t brightness = 0;
 
 int main(void)
 {
@@ -50,7 +51,7 @@ void setup(void)
     // TODO
     
     // init the display
-    // TODO
+    display_init();
     
     // init the game logic
     // TODO
@@ -61,7 +62,10 @@ void setup(void)
 //  function called as fast as possible in an endless loop
 void loop(void)
 {
-    // TODO
+    set_background(brightness, brightness, brightness);
+    update_display();
+    delay(10);
+    brightness++;
 }
 
 
