@@ -28,6 +28,8 @@
 
 // global variables / defines
 uint8_t brightness = 0;
+uint8_t color_counter = 0;
+uint8_t pos = 0;
 
 int main(void)
 {
@@ -62,10 +64,38 @@ void setup(void)
 //  function called as fast as possible in an endless loop
 void loop(void)
 {
-    set_background(0xAA, 0xAA, 0xAA);
+    // get the correct color
+    uint8_t red;
+    uint8_t grn;
+    uint8_t blu;
+    
+    red = UNPACK_RED(Wheel(color_counter)) >> 2;
+    grn = UNPACK_GRN(Wheel(color_counter)) >> 2;
+    blu = UNPACK_BLU(Wheel(color_counter)) >> 2;
+    
+    // write to the display background
+    set_background(red, grn, blu);
+    
+    // add a little shape
+    add_element_to_disp(2, pos, 1, 2, grn, blu, red);
+    add_element_to_disp(5, pos, 1, 2, grn, blu, red);
+    add_element_to_disp(0, pos + 3, 1, 1, grn, blu, red);
+    add_element_to_disp(1, pos + 4, 1, 1, grn, blu, red);
+    add_element_to_disp(7, pos + 3, 1, 1, grn, blu, red);
+    add_element_to_disp(6, pos + 4, 1, 1, grn, blu, red);
+    add_element_to_disp(2, pos + 5, 4, 1, grn, blu, red);
+    
     update_display();
-    delay(10);
-    brightness++;
+    
+    // increment the color_counter for the color wheel
+    color_counter++;
+    
+    // wait for some time to let our eyes actually see the change
+    delay(15);
+    
+    // some bad logic to make the face move a bit
+    if (!(color_counter % 0x20))
+        pos = (pos + 1) % 3;
 }
 
 
@@ -87,6 +117,27 @@ void delay(uint16_t wait_time)
     while (!_T5IF);             // wait until the timer overflows once
     
     return;
+}
+
+
+// Wheel
+//  Input a value 0 to 255 to get a color value.
+//  The colors are a transition r - g - b - back to r.
+uint32_t Wheel(uint8_t WheelPos)
+{
+    uint32_t cdown = (255 - WheelPos * 3);
+    uint32_t cup = (WheelPos * 3);
+    
+    if(WheelPos <= 85)
+    {
+        return PACK(cdown, 0, cup);
+    }
+    if(WheelPos <= 170)
+    {
+        return PACK(0, cup, cdown);
+    }
+    
+    return PACK(cup, cdown, 0);
 }
 
 

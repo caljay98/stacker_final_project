@@ -205,7 +205,7 @@ void update_display(void)
     asm("bra Z, END");          // if they are equal, go to the end
     
     // check if the next bit in the sequence is a 1 or a 0 and set OC1RS accordingly
-    if (frame_buffer[current_byte] & current_bit)   // TODO this is kinda slow
+    if (frame_buffer[current_byte] & current_bit)   // TODO this is slower than it could be
         OC1RS = WRITE_1_HIGH_CYCLES;
     
     else

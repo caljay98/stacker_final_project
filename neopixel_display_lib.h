@@ -39,11 +39,10 @@ void update_display(void);
 #define TOTAL_BYTES 192             // this is so no math needs to be done in asm
 #define WRITE_0_HIGH_CYCLES 6       // .375us
 #define WRITE_1_HIGH_CYCLES 12      // .75us
-//#define BIT_SEND_CYCLES 24          // 1.5us
-#define BIT_SEND_CYCLES 40          // this value should be as close to 24 as possible
+#define BIT_SEND_CYCLES 34          // 2.125us (spec says this should be less than 1.5us but it works with timings up to 6.25us and maybe more)
 
 // some helpful macro functions
-#define PACK_COLOR(r, g, b) (((uint32_t)((r) & 0xFF) << 16) | ((uint32_t)((g) & 0xFF) << 8) | (uint32_t)((b) & 0xFF))
+#define PACK_COLOR(r, g, b) ((((uint32_t)(r) & 0xFF) << 16) | (((uint32_t)(g) & 0xFF) << 8) | ((uint32_t)(b) & 0xFF))
 #define UNPACK_RED(packed) (0xFF & ((packed) >> 16))
 #define UNPACK_GRN(packed) (0xFF & ((packed) >> 8))
 #define UNPACK_BLU(packed) (0xFF & (packed))
