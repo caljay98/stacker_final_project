@@ -76,13 +76,13 @@ void loop(void)
     // write to the display background
     set_background(red, grn, blu);
     
-    // add a little shape
+    // add a little shape :)
     add_element_to_disp(2, pos, 1, 2, grn, blu, red);
     add_element_to_disp(5, pos, 1, 2, grn, blu, red);
-    add_element_to_disp(0, pos + 3, 1, 1, grn, blu, red);
-    add_element_to_disp(1, pos + 4, 1, 1, grn, blu, red);
-    add_element_to_disp(7, pos + 3, 1, 1, grn, blu, red);
-    add_element_to_disp(6, pos + 4, 1, 1, grn, blu, red);
+    set_pixel(0, pos + 3, grn, blu, red);
+    set_pixel(1, pos + 4, grn, blu, red);
+    set_pixel(7, pos + 3, grn, blu, red);
+    set_pixel(6, pos + 4, grn, blu, red);
     add_element_to_disp(2, pos + 5, 4, 1, grn, blu, red);
     
     update_display();

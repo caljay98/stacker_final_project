@@ -1,5 +1,5 @@
 // neopixel_display_lib.c
-//  TODO DOCS
+//  Library to set the pixels and add update the adafruit 8x8 24bit display
 // uses timer2 and OC1
 
 
@@ -9,15 +9,15 @@
 
 // global variables
 // the frame buffer read from. Must be 64 pixels long, with 3 bytes for pixels.
-// Stored in the same order as the neopixel, G-R-B.
+// Stored in the same order as the neopixel takes, G-R-B.
 uint8_t frame_buffer[NUM_OF_PIX*BYTES_PER_PIX];
 uint16_t current_byte = 0;                 // counter for each led
 uint16_t current_bit = 0;                  // counter for each bit in the color code
 
 
 // display_init
-//  This function will init the display and all of the needed interrupts. Parameters
-//  for the function are still TBD. Should always succeed
+//  This function will init the display and all of the needed interrupts. Will
+//  remove any configuration on timer2 and OC1
 void display_init()
 {
     // set each pin to digital output
@@ -43,6 +43,8 @@ void display_init()
     T2CONbits.TCKPS0 = 0;                           // set to 1:1 operation
     TMR2 = 0;                                       // reset the TMR2 counting reg
     PR2 = BIT_SEND_CYCLES - 1;                      // 1.5us cycle
+    _T2IF = 0;                                      // reset the flag
+    _T2IE = 0;                                      // no interrupt
     
     // set the background to all off
     set_background(0, 0, 0);
@@ -136,9 +138,9 @@ DISPLAY_ERR set_pixel(uint8_t xpos, uint8_t ypos,
 //  this function will start the process to refresh the display using timer2 and
 //  OC1. Takes the contents of the frame buffer and displays them on the appropriate
 //  LED on the display. The single output is controlled by OC1 and timer2. Timer2 is
-//  set to the cycle of the LEDs (1.5us), and OC1R will determine the high time which
+//  set to the cycle of the LEDs (2.125us), and OC1R will determine the high time which
 //  is based on if the bit should be high or low. Every time OC1 resets OC1R is set
-//  based on the next bit in the sequence. The entire refreshing sequence takes 2.304ms.
+//  based on the next bit in the sequence. The entire refreshing sequence takes 3.264ms.
 //  This function will hang until the refreshing is complete
 void update_display(void)
 {
@@ -169,9 +171,10 @@ void update_display(void)
     // being used
     
     // TODO what if an interrupt happens in the middle of this process, changing the regs?
-    // tell everyone that every ISR function should push and pop w3 and w4
+    // tell everyone that every ISR function should push and pop w3 and w4.
+    // Other option: put this function in a high-priority interrupt so it wont leave
     
-    // put T2IF(IFS0 bit 7), OC1RS, current_byte and bit in working regs, we will be using them a lot
+    // put current_byte and bit in working regs, we will be using them a lot
     WREG3 = &current_byte;
     WREG4 = &current_bit;
     
@@ -205,7 +208,7 @@ void update_display(void)
     asm("bra Z, END");          // if they are equal, go to the end
     
     // check if the next bit in the sequence is a 1 or a 0 and set OC1RS accordingly
-    if (frame_buffer[current_byte] & current_bit)   // TODO this is slower than it could be
+    if (frame_buffer[current_byte] & current_bit)
         OC1RS = WRITE_1_HIGH_CYCLES;
     
     else
