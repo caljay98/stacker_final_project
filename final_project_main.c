@@ -1,7 +1,11 @@
+// final_project_main.c
+//  TODO DOCS
+
 
 // includes
 #include "xc.h"
 #include "final_project_main.h"
+#include "neopixel_display_lib.h"
 
 
 // pragmas
@@ -23,7 +27,9 @@
 
 
 // global variables / defines
-// TODO
+uint8_t brightness = 0;
+uint8_t color_counter = 0;
+uint8_t pos = 0;
 
 int main(void)
 {
@@ -43,7 +49,14 @@ void setup(void)
     //Set RCDIV=1:1 (default 2:1) 32MHz or FCY/2=16M
     CLKDIVbits.RCDIV = 0;
     
+    // init the button
+    // TODO
     
+    // init the display
+    display_init();
+    
+    // init the game logic
+    // TODO
 }
 
 
@@ -51,19 +64,38 @@ void setup(void)
 //  function called as fast as possible in an endless loop
 void loop(void)
 {
+    // get the correct color
+    uint8_t red;
+    uint8_t grn;
+    uint8_t blu;
     
-}
-
-
-// timer1 ISR
-//  called every 1sec, toggle the heartbeat LED
-void __attribute__((__interrupt__, __auto_psv__)) _T1Interrupt(void)
-{
-    // reset the interrupt flag and increase the overflow value
-    IFS0bits.T1IF = 0;
+    red = UNPACK_RED(Wheel(color_counter)) >> 2;
+    grn = UNPACK_GRN(Wheel(color_counter)) >> 2;
+    blu = UNPACK_BLU(Wheel(color_counter)) >> 2;
     
-    // toggle the led
-    LATAbits.LATA0 = 1 - LATAbits.LATA0;
+    // write to the display background
+    set_background(red, grn, blu);
+    
+    // add a little shape :)
+    add_element_to_disp(2, pos, 1, 2, grn, blu, red);
+    add_element_to_disp(5, pos, 1, 2, grn, blu, red);
+    set_pixel(0, pos + 3, grn, blu, red);
+    set_pixel(1, pos + 4, grn, blu, red);
+    set_pixel(7, pos + 3, grn, blu, red);
+    set_pixel(6, pos + 4, grn, blu, red);
+    add_element_to_disp(2, pos + 5, 4, 1, grn, blu, red);
+    
+    update_display();
+    
+    // increment the color_counter for the color wheel
+    color_counter++;
+    
+    // wait for some time to let our eyes actually see the change
+    delay(15);
+    
+    // some bad logic to make the face move a bit
+    if (!(color_counter % 0x20))
+        pos = (pos + 1) % 3;
 }
 
 
@@ -85,6 +117,27 @@ void delay(uint16_t wait_time)
     while (!_T5IF);             // wait until the timer overflows once
     
     return;
+}
+
+
+// Wheel
+//  Input a value 0 to 255 to get a color value.
+//  The colors are a transition r - g - b - back to r.
+uint32_t Wheel(uint8_t WheelPos)
+{
+    uint32_t cdown = (255 - WheelPos * 3);
+    uint32_t cup = (WheelPos * 3);
+    
+    if(WheelPos <= 85)
+    {
+        return PACK(cdown, 0, cup);
+    }
+    if(WheelPos <= 170)
+    {
+        return PACK(0, cup, cdown);
+    }
+    
+    return PACK(cup, cdown, 0);
 }
 
 
