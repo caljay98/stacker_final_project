@@ -12,7 +12,7 @@ float delta = 0.1;
 // Function initializes the arcade button with polling for input and the breathing pattern using Output Compare
 void buttonInit(float tempdelta) {
     delta = tempdelta;
-    TRISB |= 0x0100;
+    TRISB |= 0x0100;        // Set pin RB8 as button input
     CNPU2 |= 0b1000000;
     
     TRISBbits.TRISB4 = 0;    // Set pin RB4 as an output
