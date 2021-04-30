@@ -8,6 +8,8 @@
 #ifndef ARCADE_BUTTON_LIB_H
 #define	ARCADE_BUTTON_LIB_H
 
+#include <stdint.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -15,7 +17,7 @@ extern "C" {
 void buttonInit(float tempdelta);
 void buttonPatternLED(void);
 void setButtonLED(int Val);
-int readInputButton();
+uint16_t readInputButton();
 
 #ifdef	__cplusplus
 }
