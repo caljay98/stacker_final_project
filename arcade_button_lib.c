@@ -54,7 +54,7 @@ void setButtonLED(int Val) {
 uint16_t readInputButton() {
     uint16_t mask = 0x0100;
     mask &= PORTB;
-    if (mask = 0x0100) {
+    if (mask == 0x0100) {
         return 1;
     }
     else {
