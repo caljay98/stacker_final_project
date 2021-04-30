@@ -8,6 +8,7 @@
 #ifndef ARCADE_BUTTON_LIB_H
 #define	ARCADE_BUTTON_LIB_H
 
+#include "xc.h"
 #include <stdint.h>
 
 #ifdef	__cplusplus
