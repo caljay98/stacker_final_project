@@ -2,8 +2,7 @@
 // Initializes the button for input and to flash
 
 #include "arcade_button_lib.h"
-#include "xc.h"
-#include <stdint.h>
+
 
 // global variables
 volatile float byteFrameNumber = 0;
