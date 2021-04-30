@@ -12,10 +12,10 @@
 extern "C" {
 #endif
 
-void buttonInit(void);
+void buttonInit(float tempdelta);
 void buttonPatternLED(void);
 void setButtonLED(int Val);
-uint16_t readInputButton();
+int readInputButton();
 
 #ifdef	__cplusplus
 }
