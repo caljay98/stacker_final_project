@@ -46,6 +46,7 @@ uint8_t gameOver = 0; //0 game is going, 1 is game over
 uint8_t buttonPress = 1; //turns 0 when button is pressed and 1 if not pressed
 uint8_t buttonPrev =1; 
 uint8_t winner = 0; //turns 1 when player has won
+uint8_t screenCorrection = 0; //Var used to correct screen size when changing width of led matrix
 
 int main(void)
 {
@@ -95,12 +96,11 @@ void loop(void)
     uint8_t blu;
     
    
-    uint8_t screenCorrection; //Var used to correct screen size when changing width of led matrix
     
     
-    red = UNPACK_RED(Wheel(color_counter)) >> 2;
-    grn = UNPACK_GRN(Wheel(color_counter)) >> 2;
-    blu = UNPACK_BLU(Wheel(color_counter)) >> 2;
+    red = UNPACK_RED(Wheel(color_counter)) >> 4;
+    grn = UNPACK_GRN(Wheel(color_counter)) >> 4;
+    blu = UNPACK_BLU(Wheel(color_counter)) >> 4;
     
      // increment the color_counter for the color wheel
     color_counter++;
@@ -123,26 +123,40 @@ void loop(void)
         //reads in button presses and turns to a 0 if button is pressed
         buttonPress = readInputButton();
         
-        //updates display and a slight delay to have some button debouncing
-        update_display();
-       
-  
         //Button is pressed
         if(buttonPress == 0 && buttonPrev == 1){
             
             //Figures out how many off the matrix is from the last matrix if any
-            if(yLevel > 0 && (prevData[yLevel-1][0] != xPos)){
-                int diff = prevData[yLevel-1][0] - xPos;
-                if(diff > 0){
-                    xPos += diff;
-                }
-                diff = abs(diff);
-                if(diff < currentWidth){   
-                    currentWidth = currentWidth - diff; 
+            if(prevData[yLevel-1][2] == currentWidth){
+                if(yLevel > 0 && (prevData[yLevel-1][0] != xPos)){
+                    int diff = prevData[yLevel-1][0] - xPos;
+                    if(diff > 0){
+                        xPos += diff;
+                    }
+                    diff = abs(diff);
+                    if(diff < currentWidth){   
+                        currentWidth = currentWidth - diff; 
                     
                 //game is over if matrix is off more by than the previous size 
-                }else if(diff >= currentWidth){
-                    gameOver = 1;
+                    }else if(diff >= currentWidth){
+                     gameOver = 1;
+                    }   
+                }
+            //Additional check if the matrix was reduced by the game and not by missing the previous matrix
+            }else if(prevData[yLevel-1][2] == currentWidth - 1){
+                if(yLevel > 0 && (prevData[yLevel-1][0] != xPos+1)){
+                    int diff = prevData[yLevel-1][0] - xPos +1;
+                    if(diff > 0){
+                        xPos += diff;
+                    }
+                    diff = abs(diff);
+                    if(diff < currentWidth){   
+                        currentWidth = currentWidth - diff; 
+                    
+                //game is over if matrix is off more by than the previous size 
+                    }else if(diff >= currentWidth){
+                     gameOver = 1;
+                    }   
                 }
             }
             //saves this levels data to be able to print it to screen
@@ -158,7 +172,8 @@ void loop(void)
             //This will also occur at Y level 6 if matrix is 2 wide
             if(yLevel == 3 && currentWidth == 3){
                 currentWidth = 2;
-            }else if(yLevel == 6 && currentWidth == 2){
+            }
+            if(yLevel == 6 && currentWidth == 2){
                 currentWidth =1;
             }
             
@@ -212,16 +227,19 @@ void loop(void)
         add_element_to_disp(2, 1, 1, 1, grn, blu, red);
         add_element_to_disp(1, 2, 1, 2, grn, blu, red);
         add_element_to_disp(0, 4, 1, 3, grn, blu, red);
-        update_display();
+        
         
     //prints a "L" to the screen if the player has lost    
     }else if(gameOver == 1){
         add_element_to_disp(5, 1, 1, 6, grn, blu, red);
         add_element_to_disp(2, 1, 3, 1, grn, blu, red);
-        update_display();
+        
     }
+    //makes sure button can not be held down 
     buttonPrev = buttonPress; 
    
+    //updates display and a slight delay to have some button debouncing
+        update_display();
 }
 
 
